@@ -32,7 +32,6 @@ plots_path="racesim/src/mcs_analysis.py"
 
 echo "----- ADJUSTING PARS FILE -----"
 
-
 #-- GAP OBJ FUNCTION --
 rename_strategy_gap "$SUB" "gapOF" #rename the .ini file --> will create a new file with input pars.ini
 
@@ -50,10 +49,10 @@ sed -i "s/race = \".*\"/race = \"${SUB}_gapOF\"/" main_train_rl_agent_dqn.py #st
 #rl_agent_dqn takes Budapest_2014 instead of just .ini file name. thats why subset is needed
 python main_train_rl_agent_dqn.py 
 
-cp "machine_learning_rl_training/output/nn_reinforcement_${SUB}_gapOF.tflite" "racesim/input/vse/"
+#cp "machine_learning_rl_training/output/nn_reinforcement_${SUB}_gapOF.tflite" "racesim/input/vse/"
 
-sed -i "s|race_results_df.to_csv(\"dfs/[^/]*_place.csv\")|race_results_df.to_csv(\"dfs/${SUB}_gap.csv\")|" "$plots_path" #change from place to gap
-sed -i "s|plt.savefig(\"plots/[^/]*_place.csv\")|plt.savefig(\"plots/${SUB}_gap.csv\")|" "$plots_path"
+#sed -i "s|race_results_df.to_csv(\"dfs/[^/]*_place.csv\")|race_results_df.to_csv(\"dfs/${SUB}_gap.csv\")|" "$plots_path" #change from place to gap
+#sed -i "s|plt.savefig(\"plots/[^/]*_place.csv\")|plt.savefig(\"plots/${SUB}_gap.csv\")|" "$plots_path"
 
 #edit main_racesim input line
 sed -i "s/race_pars_file_ = '.*'/race_pars_file_ = 'pars_${SUB}_gapOF.ini'/" main_racesim.py
@@ -68,30 +67,25 @@ sed -i '653c\            reward += self.__calculate_reward_final_position()' "$o
 #-- PLACE OBJ FUNCTION --
 
 echo "----- RUNNING PLACE OBJ FUNCTION -----"
+rename_strategy_place "$SUB" "placeOF" 
 
-rename_strategy_place "$SUB" "placeOF" #rename the .ini file --> will create a new file with input pars.ini
-
-#2indents
 sed -i '643c\        reward = 0.1 * (self.__calculate_reward_position(delta_position))' "$obj_path"
 
 OUTPUT="out_${SUB}_placeOF.txt"
 
-sed -i "s/race = \".*\"/race = \"${SUB}_placeOF\"/" main_train_rl_agent_dqn.py #stream edit, in place, race = somthing. 
-#rl_agent_dqn takes Budapest_2014 instead of just .ini file name. thats why subset is needed
+sed -i "s/race = \".*\"/race = \"${SUB}_placeOF\"/" main_train_rl_agent_dqn.py 
 python main_train_rl_agent_dqn.py 
 
-cp "machine_learning_rl_training/output/nn_reinforcement_${SUB}_placeOF.tflite" "racesim/input/vse/"
+#cp "machine_learning_rl_training/output/nn_reinforcement_${SUB}_placeOF.tflite" "racesim/input/vse/"
 
-sed -i "s|race_results_df.to_csv(\"dfs/[^/]*_gap.csv\")|race_results_df.to_csv(\"dfs/${SUB}_place.csv\")|" "$plots_path"
-sed -i "s|plt.savefig(\"plots/[^/]*_gap.csv\")|plt.savefig(\"plots/${SUB}_place.csv\")|" "$plots_path"
+#sed -i "s|race_results_df.to_csv(\"dfs/[^/]*_gap.csv\")|race_results_df.to_csv(\"dfs/${SUB}_place.csv\")|" "$plots_path"
+#sed -i "s|plt.savefig(\"plots/[^/]*_gap.csv\")|plt.savefig(\"plots/${SUB}_place.csv\")|" "$plots_path"
 
-#edit main_racesim input lini
+#edit main_racesim input line
 sed -i "s/race_pars_file_ = '.*'/race_pars_file_ = 'pars_${SUB}_placeOF.ini'/" main_racesim.py
-python main_racesim.py > "out/$OUTPUT" #check main racesim.py for pars ini file...
+python main_racesim.py > "out/$OUTPUT"
 
-#reset file to proper
-sed -i '643c\        reward = 0.1 * (self.__calculate_reward_laptime(t_pitdrive_inlap) + self.__calculate_reward_position(delta_position))' "$obj_path" #replace entire line with this, 2 indents
-
-cp "machine_learning_rl_training/output/nn_reinforcement_${SUB}_placeOF.tflite" "racesim/input/vse/"
+#reset reward
+sed -i '643c\        reward = 0.1 * (self.__calculate_reward_laptime(t_pitdrive_inlap) + self.__calculate_reward_position(delta_position))' "$obj_path" 
 
 echo 0 #exit with rerutn 0
